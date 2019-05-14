@@ -3,7 +3,7 @@
  *
  * {{ EXTENSION.extension_display_name }}. An extension for the phpBB Forum Software package.
  *
- * @copyright (c) {{ "now"|date("Y") }}{{ AUTHORS.0.author_name ? ', ' ~ AUTHORS.0.author_name }}{{ AUTHORS.0.author_homepage ? ', ' ~ AUTHORS.0.author_homepage }}
+ * @copyright (c) {{ "now"|date("Y") ~ (AUTHORS.0.author_name ? ', ' ~ AUTHORS.0.author_name) ~ (AUTHORS.0.author_homepage ? ', ' ~ AUTHORS.0.author_homepage) }}
  * @license GNU General Public License, version 2 (GPL-2.0)
  *
  */
@@ -15,40 +15,37 @@ namespace {{ EXTENSION.vendor_name }}\{{ EXTENSION.extension_name }}\ucp;
  */
 class main_module
 {
-	var $u_action;
+	public $page_title;
+	public $tpl_name;
+	public $u_action;
 
-	function main($id, $mode)
+	/**
+	 * Main UCP module
+	 *
+	 * @param int    $id   The module ID
+	 * @param string $mode The module mode (for example: manage or settings)
+	 * @throws \Exception
+	 */
+	public function main($id, $mode)
 	{
-		global $db, $request, $template, $user;
+		global $phpbb_container;
 
-		$this->tpl_name = 'ucp_demo_body';
-		$this->page_title = $user->lang('UCP_DEMO_TITLE');
-		add_form_key('acme/demo');
+		/** @var \{{ EXTENSION.vendor_name }}\{{ EXTENSION.extension_name }}\controller\ucp_controller $ucp_controller */
+		$ucp_controller = $phpbb_container->get('{{ EXTENSION.vendor_name }}.{{ EXTENSION.extension_name }}.controller.ucp');
 
-		$data = array(
-			'user_acme' => $request->variable('user_acme', $user->data['user_acme']),
-		);
+		/** @var {{ LANGUAGE.class }} ${{ LANGUAGE.object }} */
+		${{ LANGUAGE.object }} = $phpbb_container->get('{{ LANGUAGE.object }}');
 
-		if ($request->is_set_post('submit'))
-		{
-			if (!check_form_key('acme/demo'))
-			{
-				trigger_error($user->lang('FORM_INVALID'));
-			}
+		// Load a template for our UCP page
+		$this->tpl_name = 'ucp_{{ EXTENSION.extension_name|lower }}_body';
 
-			$sql = 'UPDATE ' . USERS_TABLE . '
-				SET ' . $db->sql_build_array('UPDATE', $data) . '
-				WHERE user_id = ' . $user->data['user_id'];
-			$db->sql_query($sql);
+		// Set the page title for our UCP page
+		$this->page_title = ${{ LANGUAGE.object }}->lang('UCP_{{ EXTENSION.extension_name|upper }}_TITLE');
 
-			meta_refresh(3, $this->u_action);
-			$message = $user->lang('UCP_DEMO_SAVED') . '<br /><br />' . $user->lang('RETURN_UCP', '<a href="' . $this->u_action . '">', '</a>');
-			trigger_error($message);
-		}
+		// Make the $u_action url available in our UCP controller
+		$ucp_controller->set_page_url($this->u_action);
 
-		$template->assign_vars(array(
-			'S_USER_ACME'	=> $data['user_acme'],
-			'S_UCP_ACTION'	=> $this->u_action,
-		));
+		// Load the display options handle in our UCP controller
+		$ucp_controller->display_options();
 	}
 }

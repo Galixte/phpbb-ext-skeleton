@@ -3,7 +3,7 @@
  *
  * {{ EXTENSION.extension_display_name }}. An extension for the phpBB Forum Software package.
  *
- * @copyright (c) {{ "now"|date("Y") }}{{ AUTHORS.0.author_name ? ', ' ~ AUTHORS.0.author_name }}{{ AUTHORS.0.author_homepage ? ', ' ~ AUTHORS.0.author_homepage }}
+ * @copyright (c) {{ "now"|date("Y") ~ (AUTHORS.0.author_name ? ', ' ~ AUTHORS.0.author_name) ~ (AUTHORS.0.author_homepage ? ', ' ~ AUTHORS.0.author_homepage) }}
  * @license GNU General Public License, version 2 (GPL-2.0)
  *
  */
@@ -19,30 +19,33 @@ class main_module
 	public $tpl_name;
 	public $u_action;
 
+	/**
+	 * Main ACP module
+	 *
+	 * @param int    $id   The module ID
+	 * @param string $mode The module mode (for example: manage or settings)
+	 * @throws \Exception
+	 */
 	public function main($id, $mode)
 	{
-		global $config, $request, $template, $user;
+		global $phpbb_container;
 
-		$user->add_lang_ext('{{ EXTENSION.vendor_name }}/{{ EXTENSION.extension_name }}', 'common');
-		$this->tpl_name = 'acp_demo_body';
-		$this->page_title = $user->lang('ACP_DEMO_TITLE');
-		add_form_key('acme/demo');
+		/** @var \{{ EXTENSION.vendor_name }}\{{ EXTENSION.extension_name }}\controller\acp_controller $acp_controller */
+		$acp_controller = $phpbb_container->get('{{ EXTENSION.vendor_name }}.{{ EXTENSION.extension_name }}.controller.acp');
 
-		if ($request->is_set_post('submit'))
-		{
-			if (!check_form_key('acme/demo'))
-			{
-				trigger_error('FORM_INVALID', E_USER_WARNING);
-			}
+		/** @var {{ LANGUAGE.class }} ${{ LANGUAGE.object }} */
+		${{ LANGUAGE.object }} = $phpbb_container->get('{{ LANGUAGE.object }}');
 
-			$config->set('acme_demo_goodbye', $request->variable('acme_demo_goodbye', 0));
+		// Load a template from adm/style for our ACP page
+		$this->tpl_name = 'acp_{{ EXTENSION.extension_name|lower }}_body';
 
-			trigger_error($user->lang('ACP_DEMO_SETTING_SAVED') . adm_back_link($this->u_action));
-		}
+		// Set the page title for our ACP page
+		$this->page_title = ${{ LANGUAGE.object }}->lang('ACP_{{ EXTENSION.extension_name|upper }}_TITLE');
 
-		$template->assign_vars(array(
-			'U_ACTION'				=> $this->u_action,
-			'ACME_DEMO_GOODBYE'		=> $config['acme_demo_goodbye'],
-		));
+		// Make the $u_action url available in our ACP controller
+		$acp_controller->set_page_url($this->u_action);
+
+		// Load the display options handle in our ACP controller
+		$acp_controller->display_options();
 	}
 }

@@ -5,11 +5,47 @@ imports:
 
 services:
 {% if COMPONENT.controller %}
-    {{ EXTENSION.vendor_name }}.{{ EXTENSION.extension_name }}.controller:
-        class: {{ EXTENSION.vendor_name }}\{{ EXTENSION.extension_name }}\controller\main
+    {{ EXTENSION.vendor_name }}.{{ EXTENSION.extension_name }}.controller.main:
+        class: {{ EXTENSION.vendor_name }}\{{ EXTENSION.extension_name }}\controller\main_controller
         arguments:
             - '@config'
             - '@controller.helper'
+            - '@template'
+            - '@{{ LANGUAGE.object }}'
+
+{% endif %}
+{% if COMPONENT.acp %}
+    {{ EXTENSION.vendor_name }}.{{ EXTENSION.extension_name }}.controller.acp:
+        class: {{ EXTENSION.vendor_name }}\{{ EXTENSION.extension_name }}\controller\acp_controller
+        arguments:
+            - '@config'
+{% if LANGUAGE.object == 'language' %}
+            - '@language'
+{% endif %}
+            - '@log'
+            - '@request'
+            - '@template'
+            - '@user'
+
+{% endif %}
+{% if COMPONENT.mcp %}
+    {{ EXTENSION.vendor_name }}.{{ EXTENSION.extension_name }}.controller.mcp:
+        class: {{ EXTENSION.vendor_name }}\{{ EXTENSION.extension_name }}\controller\mcp_controller
+        arguments:
+            - '@{{ LANGUAGE.object }}'
+            - '@request'
+            - '@template'
+
+{% endif %}
+{% if COMPONENT.ucp %}
+    {{ EXTENSION.vendor_name }}.{{ EXTENSION.extension_name }}.controller.ucp:
+        class: {{ EXTENSION.vendor_name }}\{{ EXTENSION.extension_name }}\controller\ucp_controller
+        arguments:
+            - '@dbal.conn'
+{% if LANGUAGE.object == 'language' %}
+            - '@language'
+{% endif %}
+            - '@request'
             - '@template'
             - '@user'
 
@@ -19,26 +55,28 @@ services:
         class: {{ EXTENSION.vendor_name }}\{{ EXTENSION.extension_name }}\service
         arguments:
             - '@user'
-            - '%{{ EXTENSION.vendor_name }}.{{ EXTENSION.extension_name }}.tables.demo_table%'
+            - '%{{ EXTENSION.vendor_name }}.{{ EXTENSION.extension_name }}.tables.{{ EXTENSION.extension_name|lower }}_table%'
 
 {% endif %}
-{% if COMPONENT.phplistener or COMPONENT.controller %}{# controller component uses the phplistener too #}
+{% if COMPONENT.phplistener or COMPONENT.controller or COMPONENT.permissions %}
     {{ EXTENSION.vendor_name }}.{{ EXTENSION.extension_name }}.listener:
         class: {{ EXTENSION.vendor_name }}\{{ EXTENSION.extension_name }}\event\main_listener
-{% if COMPONENT.controller %}
+{% if COMPONENT.phplistener or COMPONENT.controller %}
         arguments:
+            - '@{{ LANGUAGE.object }}'
+{% if COMPONENT.controller %}
             - '@controller.helper'
             - '@template'
-            - '@user'
             - '%core.php_ext%'
+{% endif %}
 {% endif %}
         tags:
             - { name: event.listener }
 
 {% endif %}
 {% if COMPONENT.console %}
-    {{ EXTENSION.vendor_name }}.{{ EXTENSION.extension_name }}.command.demo:
-        class: {{ EXTENSION.vendor_name }}\{{ EXTENSION.extension_name }}\console\command\demo
+    {{ EXTENSION.vendor_name }}.{{ EXTENSION.extension_name }}.command.sample:
+        class: {{ EXTENSION.vendor_name }}\{{ EXTENSION.extension_name }}\console\command\sample
         arguments:
             - '@user'
         tags:
@@ -46,20 +84,20 @@ services:
 
 {% endif %}
 {% if COMPONENT.cron %}
-    {{ EXTENSION.vendor_name }}.{{ EXTENSION.extension_name }}.cron.task.demo:
-        class: {{ EXTENSION.vendor_name }}\{{ EXTENSION.extension_name }}\cron\task\demo
+    {{ EXTENSION.vendor_name }}.{{ EXTENSION.extension_name }}.cron.task.sample:
+        class: {{ EXTENSION.vendor_name }}\{{ EXTENSION.extension_name }}\cron\task\sample
         arguments:
             - '@config'
         calls:
-            - [set_name, [cron.task.demo]]
+            - [set_name, [{{ EXTENSION.vendor_name }}.{{ EXTENSION.extension_name }}.cron.task.sample]]
         tags:
             - { name: cron.task }
 
 {% endif %}
 {% if COMPONENT.notification %}
-    {{ EXTENSION.vendor_name }}.{{ EXTENSION.extension_name }}.notification.type.demo:
-        class: {{ EXTENSION.vendor_name }}\{{ EXTENSION.extension_name }}\notification\type\demo
-{% if REQUIREMENTS.phpbb_version_min matches '/^[\\D]*3\\.1.*$/' %}{# for phpBB 3.1.x #}
+    {{ EXTENSION.vendor_name }}.{{ EXTENSION.extension_name }}.notification.type.sample:
+        class: {{ EXTENSION.vendor_name }}\{{ EXTENSION.extension_name }}\notification\type\sample
+{% if S_PHPBB_31 %}{# for phpBB 3.1.x #}
         scope: prototype # scope MUST be prototype for this to work!
         arguments:
             - '@user_loader'

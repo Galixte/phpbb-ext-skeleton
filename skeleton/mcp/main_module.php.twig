@@ -3,7 +3,7 @@
  *
  * {{ EXTENSION.extension_display_name }}. An extension for the phpBB Forum Software package.
  *
- * @copyright (c) {{ "now"|date("Y") }}{{ AUTHORS.0.author_name ? ', ' ~ AUTHORS.0.author_name }}{{ AUTHORS.0.author_homepage ? ', ' ~ AUTHORS.0.author_homepage }}
+ * @copyright (c) {{ "now"|date("Y") ~ (AUTHORS.0.author_name ? ', ' ~ AUTHORS.0.author_name) ~ (AUTHORS.0.author_homepage ? ', ' ~ AUTHORS.0.author_homepage) }}
  * @license GNU General Public License, version 2 (GPL-2.0)
  *
  */
@@ -15,16 +15,37 @@ namespace {{ EXTENSION.vendor_name }}\{{ EXTENSION.extension_name }}\mcp;
  */
 class main_module
 {
-	var $u_action;
+	public $page_title;
+	public $tpl_name;
+	public $u_action;
 
-	function main($id, $mode)
+	/**
+	 * Main MCP module
+	 *
+	 * @param int    $id   The module ID
+	 * @param string $mode The module mode (for example: manage or settings)
+	 * @throws \Exception
+	 */
+	public function main($id, $mode)
 	{
-		global $template, $user;
+		global $phpbb_container;
 
-		$this->tpl_name = 'mcp_demo_body';
-		$this->page_title = $user->lang('MCP_DEMO_TITLE');
-		add_form_key('acme/demo');
+		/** @var \{{ EXTENSION.vendor_name }}\{{ EXTENSION.extension_name }}\controller\mcp_controller $mcp_controller */
+		$mcp_controller = $phpbb_container->get('{{ EXTENSION.vendor_name }}.{{ EXTENSION.extension_name }}.controller.mcp');
 
-		$template->assign_var('U_POST_ACTION', $this->u_action);
+		/** @var {{ LANGUAGE.class }} ${{ LANGUAGE.object }} */
+		${{ LANGUAGE.object }} = $phpbb_container->get('{{ LANGUAGE.object }}');
+
+		// Load a template for our MCP page
+		$this->tpl_name = 'mcp_{{ EXTENSION.extension_name|lower }}_body';
+
+		// Set the page title for our MCP page
+		$this->page_title = ${{ LANGUAGE.object }}->lang('MCP_{{ EXTENSION.extension_name|upper }}_TITLE');
+
+		// Make the $u_action url available in our MCP controller
+		$mcp_controller->set_page_url($this->u_action);
+
+		// Load the display options handle in our MCP controller
+		$mcp_controller->display_options();
 	}
 }

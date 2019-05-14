@@ -1,5 +1,27 @@
 # Changelog
 
+## 1.1.1 - 2019-02-27
+
+- Added a new Permissions component to generate skeleton files that add and use permissions in an extension.
+- Improved the handling of special characters in the Display Name. Now &, < and > are displayed correctly, while double-quotes are strictly invalid.
+- Improved the generated sample migration file with a lot more documented examples of configs, config_text, permissions and custom functions.
+- Improved the depends_on() values in generated migration files.
+- Improved the naming of generated control panel language variables.
+- Improved the generation of skeleton files so that only files for the selected components will be built.
+
+## 1.1.0 - 2019-01-14
+
+- Interface updates:
+	- The Skeleton Extension can no longer be installed on phpBB 3.1 boards. The minimum requirement is now phpBB 3.2.0 or newer. (Note that you can still create skeletons that will support and run on phpBB 3.1 boards).
+	- The components section of the web UI has been organized into categories to improve the user experience when choosing what the Skeleton will create.
+	- The web UI user documentation link has been enhanced with a graphic icon to improve its visibility.
+- Skeleton updates:
+	- Skeleton files have dropped the use of "Acme" and "Demo" in favor of your own vendor and extension names. 
+	- Skeleton template files now use TWIG syntax instead of old phpBB 3.0 style template syntax.
+	- Improved distinctions between skeletons designed to be compatible with phpBB >=3.1 vs >=3.2. For example, skeletons built to support 3.1 and above will still use the User object for language functions, while skeletons built for 3.2 and above will use the newer Language object for language functions.
+	- All skeleton files have been overhauled with improved Docblocks and sample code that exemplifies phpBB's coding guidelines and best practices.
+	- ACP, UCP and MCP modules have been updated to utilise controller classes.
+
 ## 1.0.7 - 2018-03-14
 
 - The generated composer.json will now have the standard "GPL-2.0-only" license identifier.
